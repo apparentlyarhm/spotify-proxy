@@ -15,6 +15,9 @@ coverage
 # logs
 *.log
 
+# This repo contains sensitive data in .json so just ignore everything
+*.json
+
 # Benchmarking
 benchmarks/graphs
 

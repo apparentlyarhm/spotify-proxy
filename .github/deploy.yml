@@ -14,6 +14,40 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Verify required secrets
+        run: |
+          required_vars=(
+            "GCP_PROJECT_ID"
+            "GCP_REGION"
+            "IMAGE_NAME"
+            "GCP_REPOSITORY"
+            "SPOTIFY_CLIENT_ID"
+            "SPOTIFY_CLIENT_SECRET"
+            "SPOTIFY_REFRESH_TOKEN"
+          )
+
+          missing_vars=()
+          for var in "${required_vars[@]}"; do
+            if [[ -z "${!var}" ]]; then
+              echo "❌ Missing or empty: $var"
+              missing_vars+=("$var")
+            fi
+          done
+
+          if [ ${#missing_vars[@]} -ne 0 ]; then
+            echo "🔴 Error: One or more required secrets are missing or empty!"
+            exit 1
+          fi
+
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ secrets.GCP_REGION }}
+          IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+          GCP_REPOSITORY: ${{ secrets.GCP_REPOSITORY }}
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+
       - name: Set up Google Cloud Auth
         uses: google-github-actions/auth@v1
         with:
@@ -28,8 +62,8 @@ jobs:
 
       - name: Build & Push Docker image
         run: |
-          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/spotify-proxy/${{ env.IMAGE_NAME }}:latest .
-          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/spotify-proxy/${{ env.IMAGE_NAME }}:latest
+          docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest .
+          docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v1
