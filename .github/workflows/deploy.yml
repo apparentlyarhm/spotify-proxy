@@ -30,13 +30,13 @@ jobs:
           missing_vars=()
           for var in "${required_vars[@]}"; do
             if [[ -z "${!var}" ]]; then
-              echo "❌ Missing or empty: $var"
+              echo "Missing or empty: $var"
               missing_vars+=("$var")
             fi
           done
 
           if [ ${#missing_vars[@]} -ne 0 ]; then
-            echo "🔴 Error: One or more required secrets are missing or empty!"
+            echo "Error: One or more required secrets are missing or empty!"
             exit 1
           fi
 
@@ -45,6 +45,7 @@ jobs:
           GCP_REGION: ${{ secrets.GCP_REGION }}
           IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
           GCP_REPOSITORY: ${{ secrets.GCP_REPOSITORY }}
+          CLOUD_RUN_SERVICE: ${{ secrets.CLOUD_RUN_SERVICE }}
           SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
