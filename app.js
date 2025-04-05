@@ -31,6 +31,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.get("/top", async (req, res) => {
+  console.log("CI?CD test");
   try {
     const {
       type = "tracks", // 'tracks' or 'artists'
