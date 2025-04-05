@@ -21,6 +21,7 @@ jobs:
             "GCP_REGION"
             "IMAGE_NAME"
             "GCP_REPOSITORY"
+            "CLOUD_RUN_SERVICE"
             "SPOTIFY_CLIENT_ID"
             "SPOTIFY_CLIENT_SECRET"
             "SPOTIFY_REFRESH_TOKEN"
