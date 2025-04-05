@@ -5,6 +5,22 @@ require("dotenv").config();
 const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN } =
   process.env;
 
+console.log("[ENV] SPOTIFY_CLIENT_ID length:", SPOTIFY_CLIENT_ID?.length);
+console.log(
+  "[ENV] SPOTIFY_CLIENT_SECRET length:",
+  SPOTIFY_CLIENT_SECRET?.length
+);
+console.log(
+  "[ENV] SPOTIFY_REFRESH_TOKEN length:",
+  SPOTIFY_REFRESH_TOKEN?.length
+);
+
+if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN) {
+  console.warn(
+    "[ENV] One or more required Spotify environment variables are missing!"
+  );
+}
+
 let accessToken = null;
 let accessTokenExpiresAt = 0;
 
