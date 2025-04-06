@@ -2,7 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-const { getTopItems } = require("./spotify");
+const { getTopItems, getNowPlaying } = require("./spotify");
 
 require("dotenv").config();
 
@@ -31,7 +31,6 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.get("/top", async (req, res) => {
-  console.log("CI?CD test");
   try {
     const {
       type = "tracks", // 'tracks' or 'artists'
@@ -44,7 +43,17 @@ app.get("/top", async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "Failed to fetch Spotify data" });
+    res.status(500).json({ error: "Failed to fetch Top tracks" });
+  }
+});
+
+app.get("/now", async (req, res) => {
+  try {
+    const data = await getNowPlaying();
+    res.json(data);
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.status(500).json({ error: "Failed to fetch now playing" });
   }
 });
 

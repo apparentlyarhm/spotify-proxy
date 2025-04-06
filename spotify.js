@@ -17,7 +17,7 @@ console.log(
 
 if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN) {
   console.warn(
-    "[ENV] One or more required Spotify environment variables are missing!"
+    "[ENV]   One or more required Spotify environment variables are missing!"
   );
 }
 
@@ -110,6 +110,30 @@ async function getTopItems(
   }
 }
 
+async function getNowPlaying() {
+  console.log(`[Spotify] Fetching top now playing..`);
+
+  try {
+    const token = await getAccessToken();
+
+    const res = await axios.get(`https://api.spotify.com/v1/me/player`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("[Spotify] Now playing fetched successfully");
+    return res.data;
+  } catch (err) {
+    console.error(
+      "[Spotify] Failed to fetch playback state:",
+      err.response?.data || err.message
+    );
+    throw err;
+  }
+}
+
 module.exports = {
   getTopItems,
+  getNowPlaying,
 };
