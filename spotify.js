@@ -79,7 +79,8 @@ async function getTopItems(
   type = "tracks",
   time_range = "short_term",
   limit = 10,
-  offset = 0
+  offset = 0,
+  full = false
 ) {
   console.log(
     `[Spotify] Fetching top ${type} | time_range=${time_range}, limit=${limit}, offset=${offset}`
@@ -100,7 +101,30 @@ async function getTopItems(
     });
 
     console.log("[Spotify] Top items fetched successfully");
-    return res.data;
+
+    // Will use it if i want to add more stuff in the future..
+    if (full) {
+      return res.data;
+    }
+
+    // Otherwise this filteration will help us save costs on data transfer
+    const filteredItems = res.data.items.map((track) => {
+      const image300 =
+        track.album.images.find(
+          (img) => img.height === 300 && img.width === 300
+        ) || track.album.images[0];
+
+      return {
+        name: track.name,
+        artists: track.artists.map((artist) => ({ name: artist.name })),
+        album: {
+          name: track.album.name,
+          images: [image300],
+        },
+      };
+    });
+
+    return { items: filteredItems };
   } catch (err) {
     console.error(
       "[Spotify] Failed to fetch top items:",
@@ -110,7 +134,7 @@ async function getTopItems(
   }
 }
 
-async function getNowPlaying() {
+async function getNowPlaying(full = false) {
   console.log(`[Spotify] Fetching top now playing..`);
 
   try {
@@ -123,7 +147,36 @@ async function getNowPlaying() {
     });
 
     console.log("[Spotify] Now playing fetched successfully");
-    return res.data;
+
+    const data = res.data;
+
+    if (full) {
+      return data;
+    }
+    // same thing here-- will help us with data transfer costs
+    const fil = {
+      progress_ms: data.progress_ms,
+      is_playing: data.is_playing,
+      device: {
+        name: data.device.name,
+      },
+      item: {
+        album: {
+          images: [data.item.album.images[0]],
+        },
+        artists: data.item.artists.map((artist) => ({
+          name: artist.name,
+          id: artist.id,
+          external_urls: {
+            spotify: artist.external_urls.spotify,
+          },
+        })),
+        name: data.item.name,
+        duration_ms: data.item.duration_ms,
+        external_urls: data.item.external_urls,
+      },
+    };
+    return fil;
   } catch (err) {
     console.error(
       "[Spotify] Failed to fetch playback state:",

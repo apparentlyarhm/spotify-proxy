@@ -33,23 +33,42 @@ app.use(limiter);
 app.get("/top", async (req, res) => {
   try {
     const {
-      type = "tracks", // 'tracks' or 'artists'
-      time_range = "short_term", // 'short_term', 'medium_term', 'long_term'
-      limit = 10, // default: 10
-      offset = 0, // default: 0
+      type = "tracks", // only 'tracks' is allowed for now
+      time_range = "short_term",
+      limit = 10,
+      offset = 0,
+      full = "false",
     } = req.query;
 
-    const data = await getTopItems(type, time_range, limit, offset);
+    if (type !== "tracks") {
+      return res
+        .status(400)
+        .json({ error: "Only 'tracks' type is supported at the moment." });
+    }
+
+    const fullBool = full === "true";
+
+    const data = await getTopItems(
+      type,
+      time_range,
+      Number(limit),
+      Number(offset),
+      fullBool
+    );
+
     res.json(data);
   } catch (err) {
     console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "Failed to fetch Top tracks" });
+    res.status(500).json({ error: "Failed to fetch top tracks" });
   }
 });
 
 app.get("/now", async (req, res) => {
   try {
-    const data = await getNowPlaying();
+    const { full = "false" } = req.query;
+
+    const fullBool = full === "true";
+    const data = await getNowPlaying(fullBool);
     res.json(data);
   } catch (err) {
     console.error(err.response?.data || err.message);
