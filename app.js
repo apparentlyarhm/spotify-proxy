@@ -2,7 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-const { getTopItems, getNowPlaying } = require("./spotify");
+const { getTopItems, getNowPlaying, getTopPlaylistItems } = require("./spotify");
 
 require("dotenv").config();
 
@@ -73,6 +73,21 @@ app.get("/now", async (req, res) => {
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.status(500).json({ error: "Failed to fetch now playing" });
+  }
+});
+
+
+app.get("/my-playlist/items", async (req, res) => {
+try{
+  const { full = "false" } = req.query;
+
+  const fullBool = full === "true";
+
+  const data =await getTopPlaylistItems(fullBool);
+  res.json(data);
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.status(500).json({ error: "Failed to fetch playlist" });
   }
 });
 

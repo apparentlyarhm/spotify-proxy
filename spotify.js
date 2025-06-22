@@ -2,7 +2,7 @@
 const axios = require("axios");
 require("dotenv").config();
 
-const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN } =
+const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN, SPOTIFY_PLAYLIST_ID } =
   process.env;
 
 console.log("[ENV] SPOTIFY_CLIENT_ID length:", SPOTIFY_CLIENT_ID?.length);
@@ -14,8 +14,9 @@ console.log(
   "[ENV] SPOTIFY_REFRESH_TOKEN length:",
   SPOTIFY_REFRESH_TOKEN?.length
 );
+console.log("[ENV] SPOTIFY_PLAYLIST_ID length:", SPOTIFY_PLAYLIST_ID?.length);
 
-if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN) {
+if (!SPOTIFY_CLIENT_ID || !SPOTIFY_CLIENT_SECRET || !SPOTIFY_REFRESH_TOKEN || !SPOTIFY_PLAYLIST_ID) {
   console.warn(
     "[ENV]   One or more required Spotify environment variables are missing!"
   );
@@ -186,7 +187,60 @@ async function getNowPlaying(full = false) {
   }
 }
 
-module.exports = {
-  getTopItems,
-  getNowPlaying,
-};
+async function getTopPlaylistItems(
+  full = false,
+) {
+  // We are going to keep the limit and offset not exposed for now. Since we need the last 5 items, we can't give choice to the api consumer.
+
+  // We start by getting the access token.
+  const token = await getAccessToken();
+
+  // First thing we need is the number of items in the playlist.
+  try {
+    const countRes = await axios.get(
+      `https://api.spotify.com/v1/playlists/${SPOTIFY_PLAYLIST_ID}/tracks`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          offset: 0, // We don't need to offset since we are only interested in the total count
+          limit: 1, // We can set limit to 1 since we are only interested
+        },
+      }
+    );
+    const totalItems = countRes.data.total;
+    console.log(
+      `[Spotify] Fetching latest 5 playlist items for playlist ${SPOTIFY_PLAYLIST_ID} | total items: ${totalItems}`
+    );
+      
+    // Now we can fetch the last 5 items
+    const res = await axios.get(
+      `https://api.spotify.com/v1/playlists/${SPOTIFY_PLAYLIST_ID}/tracks`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          fields: full ? "" : "items(added_at,track(name, artists(name), album(name)))", // This reduces the data size, although it doesnt really matter since we are only fetching 5 items
+          limit: 5,
+          offset: Math.max(0, totalItems - 5), // Get the last 5 items
+        },
+      }
+    );
+    console.log("[Spotify] Top 5 playlist items fetched successfully");
+    return res.data // since we set the fields params based on full, we can return the res directly.
+
+  } catch (err) {
+    console.error(
+      "[Spotify] Failed to fetch playlist item count:",
+      err.response?.data || err.message
+    );
+    throw err;
+  }};
+
+  module.exports = {
+    getTopItems,
+    getNowPlaying,
+    getTopPlaylistItems,
+  };
