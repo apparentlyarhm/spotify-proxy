@@ -20,7 +20,7 @@ app.use(cors());
 // I am not expecting any traffic so this seems reasonsable enough
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 50,
+  max: 50, 
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -63,6 +63,9 @@ app.get("/top", async (req, res) => {
   }
 });
 
+/**
+ * Fetches the currently playing track info
+ */
 app.get("/now", async (req, res) => {
   try {
     const { full = "false" } = req.query;
@@ -76,7 +79,9 @@ app.get("/now", async (req, res) => {
   }
 });
 
-
+/**
+ * Fetches the latest 5 playlist items. The order is reverse here, so the latest one is last.
+ */
 app.get("/my-playlist/items", async (req, res) => {
 try{
   const { full = "false" } = req.query;

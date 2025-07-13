@@ -222,7 +222,7 @@ async function getTopPlaylistItems(
           Authorization: `Bearer ${token}`,
         },
         params: {
-          fields: full ? "" : "items(added_at,track(name, artists(name), album(name)))", // This reduces the data size, although it doesnt really matter since we are only fetching 5 items
+          fields: full ? "" : "total,items(added_at,track(external_urls,duration_ms,name, artists(name), album(name, images)))", // This reduces the data size, although it doesnt really matter since we are only fetching 5 items
           limit: 5,
           offset: Math.max(0, totalItems - 5), // Get the last 5 items
         },
