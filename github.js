@@ -17,7 +17,7 @@ async function getGithubData() {
     const query = `
       query {
         user(login: "apparentlyarhm") {
-          repositories(first: 5, orderBy: {field: PUSHED_AT, direction: DESC}) {
+          repositories(first: 8, orderBy: {field: PUSHED_AT, direction: DESC}) {
             nodes {
               name
               primaryLanguage {
