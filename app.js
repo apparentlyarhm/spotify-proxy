@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const { getTopItems, getNowPlaying, getTopPlaylistItems } = require("./spotify");
+const { getGithubData } = require("./github");
 
 require("dotenv").config();
 
@@ -82,19 +83,34 @@ app.get("/now", async (req, res) => {
 /**
  * Fetches the latest 5 playlist items. The order is reverse here, so the latest one is last.
  */
-app.get("/my-playlist/items", async (req, res) => {
-try{
-  const { full = "false" } = req.query;
 
-  const fullBool = full === "true";
+// this api is not exposed yet
 
-  const data =await getTopPlaylistItems(fullBool);
-  res.json(data);
+// app.get("/my-playlist/items", async (req, res) => {
+// try{
+//   const { full = "false" } = req.query;
+
+//   const fullBool = full === "true";
+
+//   const data =await getTopPlaylistItems(fullBool);
+//   res.json(data);
+//   } catch (err) {
+//     console.error(err.response?.data || err.message);
+//     res.status(500).json({ error: "Failed to fetch playlist" });
+//   }
+// });
+
+app.get("/github/activity", async (req, res) => {
+  try{
+    const data = await getGithubData();
+    res.json(data)
+ 
   } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "Failed to fetch playlist" });
+    console.error(err.response?.data || err.message)
+    res.status(500).json({ error: "Failed to fetch GH activity!" });
   }
-});
+
+})
 
 app.listen(PORT, () =>
   console.log(`Proxy server running on http://localhost:${PORT}`)
