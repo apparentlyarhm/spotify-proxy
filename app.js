@@ -4,6 +4,7 @@ const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const { getTopItems, getNowPlaying, getTopPlaylistItems } = require("./spotify");
 const { getGithubData } = require("./github");
+const steam = require("./steam")
 
 require("dotenv").config();
 
@@ -21,7 +22,7 @@ app.use(cors());
 // I am not expecting any traffic so this seems reasonsable enough
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 50, 
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -101,15 +102,48 @@ app.get("/now", async (req, res) => {
 // });
 
 app.get("/github/activity", async (req, res) => {
-  try{
+  try {
     const data = await getGithubData();
     res.json(data)
- 
+
   } catch (err) {
     console.error(err.response?.data || err.message)
     res.status(500).json({ error: "Failed to fetch GH activity!" });
   }
 
+})
+
+app.get("/steam", async (req, res) => {
+  const { type } = req.query;
+
+    // Basic check for parameter existence
+    if (!type) {
+        return res.status(400).json({ 
+            error: 'Bad Request', 
+            message: 'Missing required "type" query parameter.' 
+        });
+    }
+
+    try {
+
+        const data = await steam.getData(type);
+        
+        res.status(200).json(data);
+
+    } catch (error) {
+        if (error instanceof steam.InvalidSteamRequestTypeError) {
+            return res.status(400).json({
+                error: 'Bad Request',
+                message: error.message
+            });
+        }
+
+        console.error(`[Express] Error processing /steam?type=${type}:`, error.message);
+        res.status(500).json({ 
+            error: 'Internal Server Error',
+            message: 'Failed to retrieve data from the Steam service.'
+        });
+    }
 })
 
 app.listen(PORT, () =>
