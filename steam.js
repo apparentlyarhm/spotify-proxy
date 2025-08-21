@@ -13,12 +13,13 @@ const SteamDataTypes = Object.freeze({
     PROFILE: 'profile',
     ACTIVITY: 'activity',
     OWNED_GAMES: 'owned',
+    ALL: 'all',
 });
 
 const SteamInterfaces = Object.freeze({
     USER: '/ISteamUser/GetPlayerSummaries/v0002/',
     RECENT_GAMES: '/IPlayerService/GetRecentlyPlayedGames/v0001/',
-    OWNED_GAMES:'/IPlayerService/GetOwnedGames/v0001/',
+    OWNED_GAMES: '/IPlayerService/GetOwnedGames/v0001/',
 
 })
 
@@ -59,12 +60,12 @@ const fetchFromSteam = async (interfacePath, params = {}) => {
 
 
 const _getProfile = async () => {
-    const data = await fetchFromSteam(SteamInterfaces.USER, {steamids: STEAM_ID});
-    
+    const data = await fetchFromSteam(SteamInterfaces.USER, { steamids: STEAM_ID });
+
     if (!data || !data.players || data.players.length === 0) {
         throw new Error("Could not find player data.");
     }
-    
+
     const player = data.players[0];
 
     // for reference only. it makes sense to use it in the frontend.
@@ -79,7 +80,7 @@ const _getProfile = async () => {
     };
 
     const status = {
-        state: player.personastate || 'Unknown',
+        state: player.personastate,
         inGame: !!player.gameextrainfo,
         game: player.gameextrainfo || null,
         gameId: player.gameid || null
@@ -98,7 +99,7 @@ const _getProfile = async () => {
 };
 
 const _getRecentGames = async () => {
-    const data = await fetchFromSteam(SteamInterfaces.RECENT_GAMES, {steamid: STEAM_ID});
+    const data = await fetchFromSteam(SteamInterfaces.RECENT_GAMES, { steamid: STEAM_ID });
 
     // Handle the case where the user has no recently played games
     if (data.total_count === 0 || !data.games) {
@@ -139,6 +140,23 @@ const _getOwnedGames = async () => {
     };
 };
 
+const _getAll = async () => {
+
+    const promises = [
+        _getProfile(), // Assuming you already made the small helper functions
+        _getOwnedGames(),
+        _getRecentGames()
+    ];
+
+    const [p, o, r] = await Promise.all(promises)
+
+    return {
+        profile: p,
+        games: o,
+        recent: r
+    }
+}
+
 /**
  * Main function to get data based on a type.
  * @param {string} type - The type of data to fetch (from SteamDataTypes).
@@ -157,12 +175,14 @@ const getData = async (type) => {
             return _getRecentGames();
         case SteamDataTypes.OWNED_GAMES:
             return _getOwnedGames();
+        case SteamDataTypes.ALL:
+            return _getAll();
     }
 };
 
 module.exports = {
     getData,
-    SteamDataTypes, 
-    InvalidSteamRequestTypeError 
+    SteamDataTypes,
+    InvalidSteamRequestTypeError
 };
 
