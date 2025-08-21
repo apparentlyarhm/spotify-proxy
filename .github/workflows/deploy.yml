@@ -26,6 +26,8 @@ jobs:
             "SPOTIFY_CLIENT_SECRET"
             "SPOTIFY_REFRESH_TOKEN"
             "GH_TOKEN"
+            "STEAM_ID"
+            "STEAM_API_KEY"
           )
 
           missing_vars=()
@@ -51,6 +53,8 @@ jobs:
           SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          STEAM_ID: ${{ secrets.STEAM_ID }}
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
 
       - name: Set up Google Cloud Auth
         uses: google-github-actions/auth@v1
@@ -80,4 +84,6 @@ jobs:
             SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }}
             SPOTIFY_REFRESH_TOKEN=${{ secrets.SPOTIFY_REFRESH_TOKEN }}
             GH_TOKEN=${{ secrets.GH_TOKEN }}
+            STEAM_ID=${{ secrets.STEAM_ID }}
+            STEAM_API_KEY=${{ secrets.STEAM_API_KEY }}
 
