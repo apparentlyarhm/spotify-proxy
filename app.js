@@ -32,6 +32,18 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+app.get("/ping", async (req, res) => {
+  try {
+    return res
+      .status(200)
+      .json({ message: "works!", agentString:"node-express" })
+
+  } catch (err) {
+    return res
+      .status(500)
+  }
+})
+
 app.get("/top", async (req, res) => {
   try {
     const {
@@ -116,34 +128,34 @@ app.get("/github/activity", async (req, res) => {
 app.get("/steam", async (req, res) => {
   const { type } = req.query;
 
-    // Basic check for parameter existence
-    if (!type) {
-        return res.status(400).json({ 
-            error: 'Bad Request', 
-            message: 'Missing required "type" query parameter.' 
-        });
+  // Basic check for parameter existence
+  if (!type) {
+    return res.status(400).json({
+      error: 'Bad Request',
+      message: 'Missing required "type" query parameter.'
+    });
+  }
+
+  try {
+
+    const data = await steam.getData(type);
+
+    res.status(200).json(data);
+
+  } catch (error) {
+    if (error instanceof steam.InvalidSteamRequestTypeError) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: error.message
+      });
     }
 
-    try {
-
-        const data = await steam.getData(type);
-        
-        res.status(200).json(data);
-
-    } catch (error) {
-        if (error instanceof steam.InvalidSteamRequestTypeError) {
-            return res.status(400).json({
-                error: 'Bad Request',
-                message: error.message
-            });
-        }
-
-        console.error(`[Express] Error processing /steam?type=${type}:`, error.message);
-        res.status(500).json({ 
-            error: 'Internal Server Error',
-            message: 'Failed to retrieve data from the Steam service.'
-        });
-    }
+    console.error(`[Express] Error processing /steam?type=${type}:`, error.message);
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'Failed to retrieve data from the Steam service.'
+    });
+  }
 })
 
 app.listen(PORT, () =>
