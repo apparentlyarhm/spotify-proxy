@@ -123,3 +123,7 @@ Once deployed, your application will respond to API calls. For GitHub Actions, a
 
 > [!NOTE]
 > I may or may not streamline the setup at a later point of time, but more script = bad so just follow the on-screen instructions for GCP
+
+<hr>
+
+## This is ported to [Go](https://github.com/apparentlyarhm/app-proxy-go/) now.
